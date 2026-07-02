@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mouse Mover Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Drag area for frameless window -->
+    <!-- <div class="titlebar">
+    <div class="titlebar-logo">✨</div>
+  </div> -->
+
+    <div class="app-container">
+      <!-- Header/Status -->
+      <header class="app-header">
+        <div class="status-indicator">
+          <span class="status-dot idled" id="statusDot"></span>
+          <span class="status-text" id="statusText">System Idle</span>
+        </div>
+      </header>
+
+      <!-- Main Controller -->
+      <main class="app-main">
+        <!-- Toggle Card -->
+        <div class="card toggle-card">
+          <label class="switch">
+            <input type="checkbox" id="moverToggle" />
+            <span class="slider round"></span>
+          </label>
+          <span class="toggle-label" id="toggleLabel">Activate Mover</span>
+        </div>
+
+        <!-- Live Visualization Ring -->
+        <div class="visualizer-container">
+          <svg class="progress-ring" width="140" height="140">
+            <circle
+              class="progress-ring-bg"
+              stroke="#1b1d28"
+              stroke-width="6"
+              fill="transparent"
+              r="60"
+              cx="70"
+              cy="70"
+            />
+            <circle
+              class="progress-ring-fg"
+              id="progressRing"
+              stroke="#00ff66"
+              stroke-width="6"
+              fill="transparent"
+              r="60"
+              cx="70"
+              cy="70"
+              stroke-dasharray="377"
+              stroke-dashoffset="377"
+            />
+          </svg>
+          <div class="timer-display">
+            <span class="timer-countdown" id="timerCountdown">--</span>
+            <span class="timer-label">next movement</span>
+          </div>
+        </div>
+
+        <!-- Configuration Card -->
+        <div class="card settings-card">
+          <!-- Interval Setting -->
+          <div class="setting-group">
+            <div class="setting-header">
+              <span class="setting-name">Movement Interval</span>
+              <span class="setting-value" id="intervalValue">3 min</span>
+            </div>
+            <input
+              type="range"
+              class="range-slider"
+              id="intervalSlider"
+              min="10"
+              max="600"
+              step="5"
+              value="180"
+            />
+            <div class="setting-limits">
+              <span>10s</span>
+              <span>10m</span>
+            </div>
+          </div>
+
+          <!-- Distance Setting -->
+          <div class="setting-group">
+            <div class="setting-header">
+              <span class="setting-name">Movement Distance</span>
+              <span class="setting-value" id="distanceValue">200 px</span>
+            </div>
+            <input
+              type="range"
+              class="range-slider"
+              id="distanceSlider"
+              min="5"
+              max="300"
+              step="5"
+              value="200"
+            />
+            <div class="setting-limits">
+              <span>5px</span>
+              <span>300px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button class="action-btn" id="manualMoveBtn" disabled>
+          <span class="btn-icon">⚡</span> Move Now
+        </button>
+      </main>
+
+      <!-- Footer Status -->
+      <footer class="app-footer">
+        <div class="log-message" id="logMessage">
+          Toggle to start auto cursor movement
+        </div>
+      </footer>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
+

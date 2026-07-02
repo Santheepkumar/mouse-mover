@@ -1,0 +1,391 @@
+:root {
+  --bg-color: #0c0d14;
+  --card-bg: rgba(22, 24, 38, 0.6);
+  --card-border: rgba(255, 255, 255, 0.05);
+  
+  --text-main: #f0f2f5;
+  --text-muted: #8e95a5;
+  
+  --color-accent: #0088ff;
+  --color-success: #00ff66;
+  --color-success-bg: rgba(0, 255, 102, 0.1);
+  --color-error: #ff4757;
+  
+  --shadow-glow: 0 0 15px rgba(0, 136, 255, 0.35);
+  --shadow-success-glow: 0 0 20px rgba(0, 255, 102, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  font-family: 'Outfit', sans-serif;
+  -webkit-user-drag: none;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Titlebar for hiddenInset window layout */
+.titlebar {
+  height: 38px;
+  background: rgba(12, 13, 20, 0.8);
+  -webkit-app-region: drag; /* Enables window dragging */
+  display: flex;
+  align-items: center;
+  padding-left: 80px; /* Space for macOS native traffic light close/min/zoom buttons */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+}
+
+.titlebar-logo {
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.titlebar-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Main Container Layout */
+.app-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 24px 16px 24px;
+  justify-content: space-between;
+}
+
+/* App Header & Status Indicator */
+.app-header {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(5px);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+}
+
+.status-dot.idled {
+  background-color: var(--text-muted);
+  box-shadow: none;
+}
+
+.status-dot.active {
+  background-color: var(--color-success);
+  box-shadow: var(--shadow-success-glow);
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.status-indicator:has(.active) .status-text {
+  color: var(--text-main);
+}
+
+/* Card base */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Toggle Card Section */
+.toggle-card {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  margin: 8px 0;
+  gap: 16px;
+}
+
+.toggle-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.toggle-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.toggle-card:has(#moverToggle:checked) {
+  border-color: rgba(0, 255, 102, 0.15);
+  background: rgba(0, 255, 102, 0.02);
+}
+
+.toggle-card:has(#moverToggle:checked) .toggle-label {
+  color: var(--text-main);
+}
+
+/* Custom Sliding Switch toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  -webkit-app-region: no-drag;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #24273c;
+  transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--text-muted);
+  transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input:checked + .slider {
+  background-color: var(--color-success);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+  background-color: #0c0d14;
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Visualization / Timer Ring */
+.visualizer-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-fg {
+  transition: stroke-dashoffset 0.1s linear, stroke 0.3s ease;
+}
+
+.timer-display {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-countdown {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.timer-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* Configuration Settings Card */
+.settings-card {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.setting-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.setting-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+/* HTML5 Range Sliders */
+.range-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #1b1d28;
+  outline: none;
+  margin: 4px 0;
+  -webkit-app-region: no-drag;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-main);
+  cursor: pointer;
+  border: 2px solid var(--bg-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--color-accent);
+}
+
+.range-slider:active::-webkit-slider-thumb {
+  transform: scale(0.95);
+  background: var(--color-accent);
+}
+
+.setting-limits {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #4b4f63;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Action button */
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+  margin-top: 12px;
+  align-self: center;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 13px;
+}
+
+/* Footer Logs */
+.app-footer {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.log-message {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
