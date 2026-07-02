@@ -146,7 +146,7 @@ function updateTrayMenu() {
 function executeMoveCommand(distancePx) {
   let cmd = '';
   if (process.platform === 'darwin') {
-    cmd = `swift -e "import Foundation; import CoreGraphics; let pos = CGEvent(source: nil)!.location; CGWarpMouseCursorPosition(CGPoint(x: pos.x + ${distancePx}, y: pos.y)); Thread.sleep(forTimeInterval: 0.08); CGWarpMouseCursorPosition(pos)"`;
+    cmd = `swift -e "import Foundation; import CoreGraphics; let pos = CGEvent(source: nil)!.location; let event1 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: CGPoint(x: pos.x + ${distancePx}, y: pos.y), mouseButton: .left); event1?.post(tap: .cghidEventTap); Thread.sleep(forTimeInterval: 0.08); let event2 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: pos, mouseButton: .left); event2?.post(tap: .cghidEventTap)"`;
   } else if (process.platform === 'win32') {
     cmd = `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $p = [System.Windows.Forms.Cursor]::Position; [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(($p.X + ${distancePx}), $p.Y); Start-Sleep -m 80; [System.Windows.Forms.Cursor]::Position = $p"`;
   } else {

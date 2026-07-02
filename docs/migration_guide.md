@@ -29,20 +29,22 @@ import CoreGraphics
 // 1. Get the current mouse coordinates
 let pos = CGEvent(source: nil)!.location
 
-// 2. Warp/move the cursor relative to its current x position
-CGWarpMouseCursorPosition(CGPoint(x: pos.x + <distance>, y: pos.y))
+// 2. Post a low-level CGEvent (mouseMoved) relative to its current position to reset the HID idle timer
+let event1 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: CGPoint(x: pos.x + <distance>, y: pos.y), mouseButton: .left)
+event1?.post(tap: .cghidEventTap)
 
 // 3. Sleep for a short delay (80 milliseconds)
 Thread.sleep(forTimeInterval: 0.08)
 
-// 4. Warp/move the cursor back to its original location
-CGWarpMouseCursorPosition(pos)
+// 4. Post another low-level CGEvent to return the cursor to its original location
+let event2 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: pos, mouseButton: .left)
+event2?.post(tap: .cghidEventTap)
 ```
 
 ### Deep Dive into CoreGraphics APIs:
 * **`CGEvent(source: nil)!.location`**: Queries the OS windowing system for the current position of the pointer and returns a `CGPoint` struct containing `x` and `y` float coordinates.
-* **`CGWarpMouseCursorPosition(CGPoint)`**: Warps the cursor directly to the specified coordinate. Unlike standard mouse move events, "warping" shifts the pointer instantly at the hardware driver level without triggering window drags, cursor clicks, or system events, ensuring it does not interrupt user operations.
-* **`Thread.sleep(forTimeInterval: 0.08)`**: Causes the execution thread to wait for `80 milliseconds` so the operating system registers the temporary cursor movement (preventing screen savers and keeping statuses active).
+* **`CGEvent.post(tap: .cghidEventTap)`**: Injects simulated user events directly into the macOS HID event stream. By posting mouse moved events at the HID level, the operating system registers actual user activity and resets the system idle timer (`HIDIdleTime`).
+* **`Thread.sleep(forTimeInterval: 0.08)`**: Causes the execution thread to wait for `80 milliseconds` so that there's a visible but unobtrusive jitter before returning the pointer.
 
 ---
 

@@ -70,9 +70,11 @@ Mouse Mover Pro is built on a 4-tier decoupled architecture designed for perform
     import Foundation
     import CoreGraphics
     let pos = CGEvent(source: nil)!.location
-    CGWarpMouseCursorPosition(CGPoint(x: pos.x + distance, y: pos.y))
+    let event1 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: CGPoint(x: pos.x + distance, y: pos.y), mouseButton: .left)
+    event1?.post(tap: .cghidEventTap)
     Thread.sleep(forTimeInterval: 0.08)
-    CGWarpMouseCursorPosition(pos)
+    let event2 = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: pos, mouseButton: .left)
+    event2?.post(tap: .cghidEventTap)
     ```
   * **Windows (PowerShell & .NET)**:
     ```powershell
