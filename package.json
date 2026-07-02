@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "cli": "node index.js",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist:unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder"
   },
   "keywords": [],
   "author": "",
@@ -21,8 +22,12 @@
   },
   "build": {
     "appId": "com.antigravity.mousejiggler",
-    "productName": "Mouse Mover",
+    "productName": "Mouse Mover Pro",
     "npmRebuild": false,
+    "asar": true,
+    "asarUnpack": [
+      "mover-child.js"
+    ],
     "mac": {
       "category": "public.app-category.utilities",
       "target": [

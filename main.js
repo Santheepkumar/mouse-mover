@@ -195,7 +195,14 @@ function startMover(intervalMs, distancePx) {
   }
 
   const nodePath = getNodePath();
-  const childPath = path.join(__dirname, 'mover-child.js');
+  let childPath = path.join(__dirname, 'mover-child.js');
+  let cwdPath = __dirname;
+
+  // Resolve to unpacked directory if running inside an ASAR package
+  if (childPath.includes('app.asar')) {
+    childPath = childPath.replace('app.asar', 'app.asar.unpacked');
+    cwdPath = cwdPath.replace('app.asar', 'app.asar.unpacked');
+  }
 
   console.log(
     `[Main] Spawning child: ${nodePath} ${childPath} ${intervalMs} ${distancePx}`,
@@ -206,7 +213,7 @@ function startMover(intervalMs, distancePx) {
       nodePath,
       [childPath, intervalMs.toString(), distancePx.toString()],
       {
-        cwd: __dirname,
+        cwd: cwdPath,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       },
     );
