@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mouse Mover Pro — Keep Your Screen Active</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <img src="icon.png" alt="Mouse Mover Pro Logo" class="nav-logo">
+        <span class="nav-title">Mouse Mover Pro</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#demo">Interactive Demo</a>
+        <a href="#download" class="nav-cta">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">✨ Now with macOS Menu Bar & System Tray</div>
+        <h1 class="hero-title">Keep your screen active. <br><span class="gradient-text">Sleek. Silent. Minimal.</span></h1>
+        <p class="hero-description">
+          A premium, lightweight desktop utility for macOS & Windows that moves your cursor naturally. Prevent your computer from sleeping, lock screens from triggering, or chat statuses from going idle.
+        </p>
+        <div class="hero-ctas">
+          <a href="../dist/Mouse Mover Pro-1.0.0-arm64.dmg" download class="btn btn-primary">
+            <span class="btn-icon"></span> Download for Mac <span class="btn-subtext">Apple Silicon DMG</span>
+          </a>
+          <a href="#download" class="btn btn-secondary">
+            <span class="btn-icon">⊞</span> Other Platforms
+          </a>
+        </div>
+      </div>
+      
+      <!-- Interactive Showcase Mockup -->
+      <div class="hero-visual" id="demo">
+        <div class="mockup-frame">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span class="dot-red"></span>
+              <span class="dot-yellow"></span>
+              <span class="dot-green"></span>
+            </div>
+            <div class="mockup-title">Mouse Mover Pro</div>
+          </div>
+          
+          <div class="mockup-body">
+            <!-- Dynamic cursor inside the mockup -->
+            <div class="mockup-cursor" id="mockupCursor">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 3V20.1L9.7 14.4L13.8 21.6L16.4 20.1L12.3 12.9L18 12.9L4 3Z" fill="white" stroke="#0088ff" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <!-- Simulated Desktop app control panel -->
+            <div class="simulated-app">
+              <div class="sim-header">
+                <div class="status-indicator">
+                  <span class="status-dot idled" id="simDot"></span>
+                  <span class="status-text" id="simStatusText">System Idle</span>
+                </div>
+              </div>
+              
+              <div class="card toggle-card">
+                <label class="switch">
+                  <input type="checkbox" id="simToggle">
+                  <span class="slider round"></span>
+                </label>
+                <span class="toggle-label" id="simToggleLabel">Activate Mover</span>
+              </div>
+              
+              <div class="visualizer-container">
+                <svg class="progress-ring" width="100" height="100">
+                  <circle class="progress-ring-bg" stroke="#1b1d28" stroke-width="4" fill="transparent" r="44" cx="50" cy="50" />
+                  <circle class="progress-ring-fg" id="simProgressRing" stroke="#00ff66" stroke-width="4" fill="transparent" r="44" cx="50" cy="50" stroke-dasharray="276.4" stroke-dashoffset="276.4" />
+                </svg>
+                <div class="timer-display">
+                  <span class="timer-countdown" id="simTimer">--</span>
+                  <span class="timer-label">next move</span>
+                </div>
+              </div>
+              
+              <div class="card settings-card">
+                <div class="setting-row">
+                  <span class="setting-name">Interval</span>
+                  <span class="setting-val" id="simIntervalVal">5s</span>
+                </div>
+                <div class="setting-row">
+                  <span class="setting-name">Distance</span>
+                  <span class="setting-val">200px</span>
+                </div>
+              </div>
+
+              <button class="action-btn" id="simMoveBtn" disabled>⚡ Move Now</button>
+            </div>
+          </div>
+          <div class="mockup-caption">💡 Interactive Mockup: Click toggle switch to preview mouse mover action!</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features Grid -->
+  <section class="features" id="features">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Designed for utility. Engineered for elegance.</h2>
+        <p class="section-subtitle">No bloat, no complex configurations. Just open and stay active.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📂</div>
+          <h3 class="feature-title">Top Menu Bar Access</h3>
+          <p class="feature-text">Toggle cursor movement directly from your macOS Menu Bar or Windows System Tray. Runs quietly in the background without cluttering your dock.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⏱</div>
+          <h3 class="feature-title">Customizable Intervals</h3>
+          <p class="feature-text">Need it once a minute or every ten? Adjust sliders from 10 seconds to 10 minutes to match your work habits and policies.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">Adjustable Distance</h3>
+          <p class="feature-text">Select how far the cursor should move, from a subtle 5px shift to a visible 300px glide. It automatically moves and glides back to its origin.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3 class="feature-title">Decoupled Native Engine</h3>
+          <p class="feature-text">Built using a secure Node.js background process architecture. Bypasses common desktop compilation crashes to run smoothly on any system Node runtime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section class="download-section" id="download">
+    <div class="section-container">
+      <div class="download-box">
+        <div class="download-content">
+          <h2 class="download-title">Get Mouse Mover Pro</h2>
+          <p class="download-subtitle">Ready-to-use binaries for your everyday workstation.</p>
+          
+          <div class="download-cards">
+            <!-- macOS Card -->
+            <div class="platform-card">
+              <div class="platform-icon"></div>
+              <h3 class="platform-name">macOS</h3>
+              <p class="platform-version">v1.0.0 (Apple Silicon)</p>
+              <a href="../dist/Mouse Mover Pro-1.0.0-arm64.dmg" download class="btn btn-primary full-width">Download DMG</a>
+            </div>
+
+            <!-- Windows Card -->
+            <div class="platform-card">
+              <div class="platform-icon">⊞</div>
+              <h3 class="platform-name">Windows</h3>
+              <p class="platform-version">v1.0.0 (x64 Installer)</p>
+              <a href="#" class="btn btn-secondary full-width disabled">Download EXE</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="icon.png" alt="Mouse Mover Pro Logo" class="footer-logo">
+        <span>Mouse Mover Pro</span>
+      </div>
+      <p class="footer-copy">&copy; 2026 Mouse Mover Pro. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
