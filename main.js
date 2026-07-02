@@ -8,55 +8,16 @@ const {
 } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { exec } = require('child_process');
 
 let mainWindow = null;
-let childProcess = null;
+let moverTimer = null;
 let tray = null;
 
 // Default configuration settings
 let currentIntervalMs = 180000;
 let currentDistancePx = 200;
 
-// Dynamically locate the system Node.js binary
-function getNodePath() {
-  if (process.platform === 'win32') {
-    try {
-      const whereOutput = require('child_process')
-        .execSync('where node', { encoding: 'utf8' })
-        .trim()
-        .split('\r\n');
-      if (whereOutput[0] && fs.existsSync(whereOutput[0])) {
-        return whereOutput[0];
-      }
-    } catch (e) {
-      console.warn("[Main] 'where node' failed, falling back to 'node'");
-    }
-    return 'node';
-  } else {
-    // macOS / Linux
-    try {
-      const whichOutput = require('child_process')
-        .execSync('which node', { encoding: 'utf8' })
-        .trim();
-      if (whichOutput && fs.existsSync(whichOutput)) {
-        return whichOutput;
-      }
-    } catch (e) {
-      console.warn("[Main] 'which node' failed, scanning common paths");
-    }
-
-    const commonPaths = [
-      '/opt/homebrew/bin/node',
-      '/usr/local/bin/node',
-      '/usr/bin/node',
-    ];
-    for (const p of commonPaths) {
-      if (fs.existsSync(p)) return p;
-    }
-    return 'node';
-  }
-}
 
 function createWindow() {
   if (mainWindow) {
@@ -119,7 +80,7 @@ function createTray() {
 function updateTrayMenu() {
   if (!tray) return;
 
-  const isRunning = childProcess !== null;
+  const isRunning = moverTimer !== null;
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -182,120 +143,80 @@ function updateTrayMenu() {
   tray.setContextMenu(contextMenu);
 }
 
+function executeMoveCommand(distancePx) {
+  let cmd = '';
+  if (process.platform === 'darwin') {
+    cmd = `swift -e "import Foundation; import CoreGraphics; let pos = CGEvent(source: nil)!.location; CGWarpMouseCursorPosition(CGPoint(x: pos.x + ${distancePx}, y: pos.y)); Thread.sleep(forTimeInterval: 0.08); CGWarpMouseCursorPosition(pos)"`;
+  } else if (process.platform === 'win32') {
+    cmd = `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $p = [System.Windows.Forms.Cursor]::Position; [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(($p.X + ${distancePx}), $p.Y); Start-Sleep -m 80; [System.Windows.Forms.Cursor]::Position = $p"`;
+  } else {
+    console.warn(`[Main] Cursor moving not supported on platform: ${process.platform}`);
+    return;
+  }
+
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) {
+      console.error('[Main] Move command execution failed:', error);
+      if (mainWindow) {
+        mainWindow.webContents.send('mover:event', {
+          type: 'move-error',
+          error: error.message
+        });
+      }
+      return;
+    }
+
+    if (mainWindow) {
+      mainWindow.webContents.send('mover:event', {
+        type: 'move-success',
+        timestamp: Date.now()
+      });
+    }
+  });
+}
+
 function startMover(intervalMs, distancePx) {
   currentIntervalMs = intervalMs;
   currentDistancePx = distancePx;
 
-  if (childProcess) {
-    console.log(
-      '[Main] Mover child process already running, updating settings instead',
-    );
-    updateMover(intervalMs, distancePx);
-    return;
+  if (moverTimer) {
+    clearInterval(moverTimer);
   }
 
-  const nodePath = getNodePath();
-  let childPath = path.join(__dirname, 'mover-child.js');
-  let cwdPath = __dirname;
+  console.log(`[Main] Starting Mover timer. Interval: ${intervalMs}ms, Distance: ${distancePx}px`);
 
-  // Resolve to unpacked directory if running inside an ASAR package
-  if (childPath.includes('app.asar')) {
-    childPath = childPath.replace('app.asar', 'app.asar.unpacked');
-    cwdPath = cwdPath.replace('app.asar', 'app.asar.unpacked');
-  }
+  moverTimer = setInterval(() => {
+    executeMoveCommand(currentDistancePx);
+  }, intervalMs);
 
-  console.log(
-    `[Main] Spawning child: ${nodePath} ${childPath} ${intervalMs} ${distancePx}`,
-  );
-
-  try {
-    childProcess = spawn(
-      nodePath,
-      [childPath, intervalMs.toString(), distancePx.toString()],
-      {
-        cwd: cwdPath,
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      },
-    );
-
-    childProcess.on('message', (msg) => {
-      if (!msg) return;
-
-      // Forward child messages to UI
-      if (mainWindow) {
-        mainWindow.webContents.send('mover:event', msg);
-      }
-    });
-
-    childProcess.stdout.on('data', (data) => {
-      console.log(`[Child STDOUT] ${data.toString().trim()}`);
-    });
-
-    childProcess.stderr.on('data', (data) => {
-      console.error(`[Child STDERR] ${data.toString().trim()}`);
-    });
-
-    childProcess.on('error', (err) => {
-      console.error('[Main] Error spawning child process:', err);
-      if (mainWindow) {
-        mainWindow.webContents.send('mover:event', {
-          type: 'move-error',
-          error: `Spawn failed: ${err.message}`,
-        });
-      }
-      childProcess = null;
-      updateTrayMenu();
-    });
-
-    childProcess.on('exit', (code, signal) => {
-      console.log(
-        `[Main] Child process exited: code=${code}, signal=${signal}`,
-      );
-      childProcess = null;
-      updateTrayMenu();
-      if (mainWindow) {
-        mainWindow.webContents.send('mover:event', { type: 'move-stopped' });
-      }
-    });
-
-    updateTrayMenu();
-  } catch (err) {
-    console.error('[Main] Exception spawning child process:', err);
-    if (mainWindow) {
-      mainWindow.webContents.send('mover:event', {
-        type: 'move-error',
-        error: err.message,
-      });
-    }
-  }
+  updateTrayMenu();
 }
 
 function stopMover() {
-  if (childProcess) {
-    console.log('[Main] Stopping child process...');
-    childProcess.kill('SIGTERM');
-    childProcess = null;
+  if (moverTimer) {
+    console.log('[Main] Stopping Mover timer...');
+    clearInterval(moverTimer);
+    moverTimer = null;
     updateTrayMenu();
   }
 }
 
 function updateMover(intervalMs, distancePx) {
+  const needsRestart = (intervalMs !== currentIntervalMs);
+
   currentIntervalMs = intervalMs;
   currentDistancePx = distancePx;
 
-  if (childProcess && childProcess.connected) {
-    childProcess.send({
-      type: 'update-settings',
-      intervalMs,
-      distancePx,
-    });
+  console.log(`[Main] Updating Mover settings. Interval: ${intervalMs}ms, Distance: ${distancePx}px`);
+
+  if (moverTimer && needsRestart) {
+    startMover(intervalMs, distancePx);
   }
 }
 
 function triggerManualMove() {
-  if (childProcess && childProcess.connected) {
-    childProcess.send({ type: 'trigger-move' });
-  }
+  console.log('[Main] Triggering manual cursor move');
+  executeMoveCommand(currentDistancePx);
 }
 
 // IPC Handlers
