@@ -21,7 +21,8 @@
   },
   "build": {
     "appId": "com.antigravity.mousejiggler",
-    "productName": "Mouse Mover Pro",
+    "productName": "Mouse Mover",
+    "npmRebuild": false,
     "mac": {
       "category": "public.app-category.utilities",
       "target": [
@@ -47,3 +48,4 @@
     ]
   }
 }
+

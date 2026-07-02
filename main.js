@@ -1,4 +1,11 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  Menu,
+  nativeImage,
+} = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -42,7 +49,7 @@ function getNodePath() {
     const commonPaths = [
       '/opt/homebrew/bin/node',
       '/usr/local/bin/node',
-      '/usr/bin/node'
+      '/usr/bin/node',
     ];
     for (const p of commonPaths) {
       if (fs.existsSync(p)) return p;
@@ -63,15 +70,15 @@ function createWindow() {
     resizable: false,
     maximizable: false,
     fullscreenable: false,
-    title: 'Mouse Mover Pro',
+    title: 'Mouse Mover',
     icon: path.join(__dirname, 'icon.png'),
     titleBarStyle: 'hiddenInset', // beautiful native window control overlay on macOS
     backgroundColor: '#0c0d12',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
-    }
+      nodeIntegration: false,
+    },
   });
 
   mainWindow.loadFile('index.html');
@@ -95,7 +102,7 @@ function createTray() {
   icon.setTemplateImage(true); // Supports dark/light menu bars automatically on macOS
 
   tray = new Tray(icon);
-  tray.setToolTip('Mouse Mover Pro');
+  tray.setToolTip('Mouse Mover');
 
   updateTrayMenu();
 
@@ -116,8 +123,8 @@ function updateTrayMenu() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Mouse Mover Pro',
-      enabled: false
+      label: 'Mouse Mover',
+      enabled: false,
     },
     { type: 'separator' },
     {
@@ -128,26 +135,28 @@ function updateTrayMenu() {
         if (isRunning) {
           stopMover();
           if (mainWindow) {
-            mainWindow.webContents.send('mover:event', { type: 'move-stopped' });
+            mainWindow.webContents.send('mover:event', {
+              type: 'move-stopped',
+            });
           }
         } else {
           startMover(currentIntervalMs, currentDistancePx);
           if (mainWindow) {
-            mainWindow.webContents.send('mover:event', { 
+            mainWindow.webContents.send('mover:event', {
               type: 'move-started',
               intervalMs: currentIntervalMs,
-              distancePx: currentDistancePx
+              distancePx: currentDistancePx,
             });
           }
         }
-      }
+      },
     },
     {
       label: 'Move Cursor Now',
       enabled: isRunning,
       click: () => {
         triggerManualMove();
-      }
+      },
     },
     { type: 'separator' },
     {
@@ -158,7 +167,7 @@ function updateTrayMenu() {
         } else {
           createWindow();
         }
-      }
+      },
     },
     {
       label: 'Quit',
@@ -166,8 +175,8 @@ function updateTrayMenu() {
         stopMover();
         app.isQuitting = true;
         app.quit();
-      }
-    }
+      },
+    },
   ]);
 
   tray.setContextMenu(contextMenu);
@@ -178,7 +187,9 @@ function startMover(intervalMs, distancePx) {
   currentDistancePx = distancePx;
 
   if (childProcess) {
-    console.log('[Main] Mover child process already running, updating settings instead');
+    console.log(
+      '[Main] Mover child process already running, updating settings instead',
+    );
     updateMover(intervalMs, distancePx);
     return;
   }
@@ -186,17 +197,23 @@ function startMover(intervalMs, distancePx) {
   const nodePath = getNodePath();
   const childPath = path.join(__dirname, 'mover-child.js');
 
-  console.log(`[Main] Spawning child: ${nodePath} ${childPath} ${intervalMs} ${distancePx}`);
+  console.log(
+    `[Main] Spawning child: ${nodePath} ${childPath} ${intervalMs} ${distancePx}`,
+  );
 
   try {
-    childProcess = spawn(nodePath, [childPath, intervalMs.toString(), distancePx.toString()], {
-      cwd: __dirname,
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-    });
+    childProcess = spawn(
+      nodePath,
+      [childPath, intervalMs.toString(), distancePx.toString()],
+      {
+        cwd: __dirname,
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      },
+    );
 
     childProcess.on('message', (msg) => {
       if (!msg) return;
-      
+
       // Forward child messages to UI
       if (mainWindow) {
         mainWindow.webContents.send('mover:event', msg);
@@ -216,7 +233,7 @@ function startMover(intervalMs, distancePx) {
       if (mainWindow) {
         mainWindow.webContents.send('mover:event', {
           type: 'move-error',
-          error: `Spawn failed: ${err.message}`
+          error: `Spawn failed: ${err.message}`,
         });
       }
       childProcess = null;
@@ -224,7 +241,9 @@ function startMover(intervalMs, distancePx) {
     });
 
     childProcess.on('exit', (code, signal) => {
-      console.log(`[Main] Child process exited: code=${code}, signal=${signal}`);
+      console.log(
+        `[Main] Child process exited: code=${code}, signal=${signal}`,
+      );
       childProcess = null;
       updateTrayMenu();
       if (mainWindow) {
@@ -233,13 +252,12 @@ function startMover(intervalMs, distancePx) {
     });
 
     updateTrayMenu();
-
   } catch (err) {
     console.error('[Main] Exception spawning child process:', err);
     if (mainWindow) {
       mainWindow.webContents.send('mover:event', {
         type: 'move-error',
-        error: err.message
+        error: err.message,
       });
     }
   }
@@ -262,7 +280,7 @@ function updateMover(intervalMs, distancePx) {
     childProcess.send({
       type: 'update-settings',
       intervalMs,
-      distancePx
+      distancePx,
     });
   }
 }
@@ -303,7 +321,7 @@ app.whenReady().then(() => {
         app.dock.setIcon(iconPath);
       }
     } catch (e) {
-      console.warn("[Main] Failed to set dock icon:", e);
+      console.warn('[Main] Failed to set dock icon:', e);
     }
   }
   createTray();
@@ -326,3 +344,4 @@ app.on('before-quit', () => {
   app.isQuitting = true;
   stopMover();
 });
+
